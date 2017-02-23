@@ -492,7 +492,7 @@ def run_tests():
 
     if junit_output:
         f = codecs.open(junit_output, encoding='utf-8', mode='w')
-        f.write('<testsuite tests="{0}">\n'.format(len(test_results)),)
+        f.write('<testsuite name="" tests="{0}" errors="{1}" failures="{2}">\n'.format(len(test_results), counts['Fail'], counts['CompileFail']))
         for result in test_results:
             testcase = '  <testcase classname="{0}" name="{1}"'.format(result['ClassName'], result['Method'])
             if 'Stats' in result and result['Stats'] and 'duration' in result['Stats']:
