@@ -490,11 +490,17 @@ def run_tests():
         f.write(json.dumps(test_results))
         f.close()
 
+
+    def _cleanNames(name):
+        name = name.replace('<', '')
+        name = name.replace('>', '')
+        return name
+
     if junit_output:
         f = codecs.open(junit_output, encoding='utf-8', mode='w')
         f.write('<testsuite name="" tests="{0}" errors="{1}" failures="{2}">\n'.format(len(test_results), counts['Fail'], counts['CompileFail']))
         for result in test_results:
-            testcase = '  <testcase classname="{0}" name="{1}"'.format(result['ClassName'], result['Method'])
+            testcase = '  <testcase classname="{0}" name="{1}"'.format(_cleanNames(result['ClassName']), _cleanNames(result['Method']))
             if 'Stats' in result and result['Stats'] and 'duration' in result['Stats']:
                 testcase = '{0} time="{1}"'.format(testcase, result['Stats']['duration'])
             if result['Outcome'] in ['Fail','CompileFail']:
