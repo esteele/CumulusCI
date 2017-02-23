@@ -9,17 +9,12 @@ import calendar
 import collections
 import json
 from simple_salesforce import Salesforce
-try:
-    from importlib import reload
-except ImportError:
-    try:
-        from imp import reload
-    except ImportError:
-        pass
 
-# Force UTF8 output
-reload(sys)
-sys.setdefaultencoding('UTF8')
+if sys.getdefaultencoding() != 'utf-8':
+    # Force UTF8 output
+    reload(sys)
+    sys.setdefaultencoding('UTF8')
+
 
 def log_time_delta(start, end):
     """ Returns microsecond difference between two debug log timestamps
