@@ -405,8 +405,7 @@ def run_tests():
     test_results = []
 
     class_names = results_by_class_name.keys()
-    class_names.sort()
-    for class_name in class_names:
+    for class_name in sorted(class_names):
         class_id = classes_by_name[class_name]
         duration = None
         if debug and class_id in logs_by_class_id:
@@ -417,8 +416,7 @@ def run_tests():
         sys.stdout.flush()
 
         method_names = results_by_class_name[class_name].keys()
-        method_names.sort()
-        for method_name in method_names:
+        for method_name in sorted(method_names):
             result = results_by_class_name[class_name][method_name]
 
             test_results.append({
@@ -450,8 +448,7 @@ def run_tests():
                     print(u'       No stats found, likely because of debug log size limit')
                 else:
                     stat_keys = stats.keys()
-                    stat_keys.sort()
-                    for stat in stat_keys:
+                    for stat in sorted(stat_keys):
                         try:
                             value = stats[stat]
                             output = u'       {0} / {1}'.format(value['used'], value['allowed'])
