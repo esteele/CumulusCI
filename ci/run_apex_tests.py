@@ -256,12 +256,12 @@ def run_tests():
     if where_exclude:
         query += " AND {0}".format(' AND '.join(where_exclude),)
 
-    print "Running Query: {0}".format(query,)
+    print("Running Query: {0}".format(query,))
     sys.stdout.flush()
 
     res = sf.query_all(query)
 
-    print "Found {0} classes".format(res['totalSize'],)
+    print("Found {0} classes".format(res['totalSize'],))
     sys.stdout.flush()
 
     if not res['totalSize']:
@@ -281,7 +281,7 @@ def run_tests():
 
     # If debug is turned on, setup debug traces for all test classes
     if debug:
-        print 'Setting up trace flag to capture debug logs'
+        print('Setting up trace flag to capture debug logs')
 
         # Get the User's id to set a TraceFlag
         res_user = sf.query("Select Id from User where Username = '{0}'".format(username,))
@@ -316,10 +316,10 @@ def run_tests():
         })
         trace_id = res['id']
 
-        print 'Created TraceFlag for user'
+        print('Created TraceFlag for user')
     
     # Run all the tests
-    print "Queuing tests for execution..."
+    print("Queuing tests for execution...")
     sys.stdout.flush()
     job_id = sf.restful('runTestsAsynchronous', params={'classids': ','.join(classes_by_id.keys())})
     
@@ -340,14 +340,14 @@ def run_tests():
     
         # If all tests have run, break from the loop
         if not counts['Queued'] and not counts['Processing']:
-            print ''
-            print '-------------------------------------------------------------------------------'
-            print 'Test Results'
-            print '-------------------------------------------------------------------------------'
+            print('')
+            print('-------------------------------------------------------------------------------')
+            print('Test Results')
+            print('-------------------------------------------------------------------------------')
             sys.stdout.flush()
             break
         
-        print 'Completed: %(Completed)s  Processing: %(Processing)s  Queued: %(Queued)s' % counts
+        print('Completed: %(Completed)s  Processing: %(Processing)s  Queued: %(Queued)s' % counts)
         sys.stdout.flush()
         sleep(poll_interval)
     
@@ -391,7 +391,10 @@ def run_tests():
             
             # Add method stats to results_by_class_name
             for method, info in method_stats.items():
-                results_by_class_name[class_name][method].update(info)
+                try:
+                    results_by_class_name[class_name][method].update(info)
+                except Exception, e:
+                    pass
 
         # Delete the trace flag
         TraceFlag.delete(trace_id)
@@ -406,9 +409,9 @@ def run_tests():
         duration = None
         if debug and class_id in logs_by_class_id:
             duration = int(logs_by_class_id[class_id]['DurationMilliseconds']) * .001
-            print 'Class: {0} ({1}s)'.format(class_name, duration)
+            print('Class: {0} ({1}s)'.format(class_name, duration))
         else:
-            print 'Class: {0}'.format(class_name,)
+            print('Class: {0}'.format(class_name,))
         sys.stdout.flush()
 
         method_names = results_by_class_name[class_name].keys()
@@ -430,19 +433,19 @@ def run_tests():
             # Output result for method
             if debug and json_output and result.get('stats') and 'duration' in result['stats']:
                 # If debug is enabled and we're generating the json output, include duration with the test
-                print u'   {0}: {1} ({2}s)'.format(
+                print(u'   {0}: {1} ({2}s)'.format(
                     result['Outcome'], 
                     result['MethodName'], 
                     result['stats']['duration']
-                )
+                ))
             else:
-                print u'   {Outcome}: {MethodName}'.format(**result)
+                print(u'   {Outcome}: {MethodName}'.format(**result))
 
             if debug and not json_output:
-                print u'     DEBUG LOG INFO:'
+                print(u'     DEBUG LOG INFO:')
                 stats = result.get('stats',None)
                 if not stats:
-                    print u'       No stats found, likely because of debug log size limit'
+                    print(u'       No stats found, likely because of debug log size limit')
                 else:
                     stat_keys = stats.keys()
                     stat_keys.sort()
@@ -450,27 +453,27 @@ def run_tests():
                         try:
                             value = stats[stat]
                             output = u'       {0} / {1}'.format(value['used'], value['allowed'])
-                            print output.ljust(26) + stat
+                            print(output.ljust(26) + stat)
                         except:
                             output = u'       {0}'.format(stats[stat],)
-                            print output.ljust(26) + stat
+                            print(output.ljust(26) + stat)
     
             # Print message and stack trace if failed
             if result['Outcome'] in ['Fail','CompileFail']:
-                print u'   Message: {Message}'.format(**result)
-                print u'   StackTrace: {StackTrace}'.format(**result)
+                print(u'   Message: {Message}'.format(**result))
+                print(u'   StackTrace: {StackTrace}'.format(**result))
             sys.stdout.flush()
     
-    print u'-------------------------------------------------------------------------------'
-    print u'Passed: %(Pass)s  Fail: %(Fail)s  Compile Fail: %(CompileFail)s  Skipped: %(Skip)s' % counts
-    print u'-------------------------------------------------------------------------------'
+    print(u'-------------------------------------------------------------------------------')
+    print(u'Passed: %(Pass)s  Fail: %(Fail)s  Compile Fail: %(CompileFail)s  Skipped: %(Skip)s' % counts)
+    print(u'-------------------------------------------------------------------------------')
     sys.stdout.flush()
     
     if counts['Fail'] or counts['CompileFail']:
-        print u''
-        print u'Failing Tests'
-        print u'-------------'
-        print u''
+        print(u'')
+        print(u'Failing Tests')
+        print(u'-------------')
+        print(u'')
         sys.stdout.flush()
 
         counter = 0
@@ -478,9 +481,9 @@ def run_tests():
             if result['Outcome'] not in ['Fail','CompileFail']:
                 continue
             counter += 1
-            print u'{0}: {1}.{2} - {3}'.format(counter, result['ClassName'], result['Method'], result['Outcome'])
-            print u'  Message: {0}'.format(result['Message'],)
-            print u'  StackTrace: {0}'.format(result['StackTrace'],)
+            print(u'{0}: {1}.{2} - {3}'.format(counter, result['ClassName'], result['Method'], result['Outcome']))
+            print(u'  Message: {0}'.format(result['Message'],))
+            print(u'  StackTrace: {0}'.format(result['StackTrace'],))
             sys.stdout.flush()
 
     if json_output:
@@ -498,9 +501,9 @@ def run_tests():
             if result['Outcome'] in ['Fail','CompileFail']:
                 testcase = '{0}>\n'.format(testcase,)
                 testcase = '{0}    <failure type="{1}">{2}</failure>\n'.format(
-                    testcase, 
-                    cgi.escape(result['StackTrace']), 
-                    cgi.escape(result['Message']),
+                    testcase,
+                    cgi.escape(result['StackTrace'] or ''),
+                    cgi.escape(result['Message'] or ''),
                 )
                 testcase = '{0}  </testcase>\n'.format(testcase,)
             else:
@@ -509,23 +512,23 @@ def run_tests():
 
         f.write('</testsuite>')
         f.close()
-        
+
 
     return counts
-
+        
 if __name__ == '__main__':
     try:
-        
         counts = run_tests()
         # Exit with status 1 if test failures occurred
         if counts['Fail'] or counts['CompileFail'] or counts['Skip']:
             sys.exit(1)
     except SystemExit:
+        
         sys.exit(1)            
     except:
         import traceback
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        print '-'*60
+        print('-'*60)
         traceback.print_exception(exc_type, exc_value, exc_traceback, file=sys.stdout)
-        print '-'*60
+        print('-'*60)
         sys.exit(2)
