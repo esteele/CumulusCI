@@ -51,8 +51,8 @@ def decode_to_unicode(content):
     if content:
         try:
             # Try to decode ISO-8859-1 to unicode
-            return codecs.decode(content, 'ISO-8859-1')
-        except UnicodeEncodeError:
+            return content.decode('ISO-8859-1')
+        except (UnicodeEncodeError, AttributeError):
             # If decoding ISO-8859 failed, assume content is unicode already
             return content
 
