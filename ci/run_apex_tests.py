@@ -393,7 +393,7 @@ def run_tests():
             for method, info in method_stats.items():
                 try:
                     results_by_class_name[class_name][method].update(info)
-                except Exception, e:
+                except Exception as e:
                     pass
 
         # Delete the trace flag
