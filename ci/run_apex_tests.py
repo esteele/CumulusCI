@@ -9,6 +9,13 @@ import calendar
 import collections
 import json
 from simple_salesforce import Salesforce
+try:
+    from importlib import reload
+except ImportError:
+    try:
+        from imp import reload
+    except ImportError:
+        pass
 
 # Force UTF8 output
 reload(sys)
