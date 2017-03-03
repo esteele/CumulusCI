@@ -383,7 +383,7 @@ def run_tests():
             log_file = class_name + '.log'
             if debug_logdir:
                 log_file = debug_logdir + os.sep + log_file
-            f = open(log_file, 'w')
+            f = open(log_file, 'wb')
             f.write(resp.content)
             f.close()
 
