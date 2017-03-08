@@ -524,7 +524,7 @@ def run_tests():
                 testcases += testcase
 
             class_id = classes_by_name[class_name]
-            duration = logs_by_class_id['01p80000000t8aLAAQ']['DurationMilliseconds'] * .001
+            duration = logs_by_class_id[class_id].get('DurationMilliseconds', 0) * .001
             testsuite = '  <testsuite classname="{0}" tests="{1}" errors="{2}" failures="{3}" skipped="{4}" time="{5}">\n{6}</testsuite>\n'.format(
                 _cleanNames(class_name),
                 outcomes['Pass'] + outcomes['CompileFail'] + outcomes['Fail'] + outcomes['Skipped'],
