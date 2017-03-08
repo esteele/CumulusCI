@@ -9,6 +9,7 @@ import calendar
 import collections
 import json
 from simple_salesforce import Salesforce
+from itertools import groupby
 
 if sys.getdefaultencoding() != 'utf-8':
     # Force UTF8 output
@@ -498,24 +499,42 @@ def run_tests():
 
     if junit_output:
         f = codecs.open(junit_output, encoding='utf-8', mode='w')
-        f.write('<testsuite name="" tests="{0}" errors="{1}" failures="{2}">\n'.format(len(test_results), counts['Fail'], counts['CompileFail']))
-        for result in test_results:
-            testcase = '  <testcase classname="{0}" name="{1}"'.format(_cleanNames(result['ClassName']), _cleanNames(result['Method']))
-            if 'Stats' in result and result['Stats'] and 'duration' in result['Stats']:
-                testcase = '{0} time="{1}"'.format(testcase, result['Stats']['duration'])
-            if result['Outcome'] in ['Fail','CompileFail']:
-                testcase = '{0}>\n'.format(testcase,)
-                testcase = '{0}    <failure type="{1}">{2}</failure>\n'.format(
-                    testcase,
-                    cgi.escape(result['StackTrace'] or ''),
-                    cgi.escape(result['Message'] or ''),
-                )
-                testcase = '{0}  </testcase>\n'.format(testcase,)
-            else:
-                testcase = '{0} />\n'.format(testcase,)
-            f.write(testcase)
+        # f.write('<testsuite name="" tests="{0}" errors="{1}" failures="{2}">\n'.format(len(test_results), counts['Fail'], counts['CompileFail']))
+        f.write('<testsuites>\n')
+        data = sorted(test_results, key=lambda x:(x['ClassName'], x['TestTimestamp']))
+        for class_name, tests in groupby(data, lambda x:x['ClassName']):
+            testcases = ''
+            outcomes = {'Pass':0, 'Fail': 0, 'CompileFail': 0, 'Skipped': 0}
 
-        f.write('</testsuite>')
+            for result in tests:
+                outcomes[result['Outcome']] = outcomes[result['Outcome']] + 1
+                testcase = '    <testcase classname="{0}" name="{1}"'.format(_cleanNames(result['ClassName']), _cleanNames(result['Method']))
+                if 'Stats' in result and result['Stats'] and 'duration' in result['Stats']:
+                    testcase = '{0} time="{1}"'.format(testcase, result['Stats']['duration'])
+                if result['Outcome'] in ['Fail','CompileFail']:
+                    testcase = '{0}>\n'.format(testcase,)
+                    testcase = '{0}      <failure type="{1}">{2}</failure>\n'.format(
+                        testcase,
+                        cgi.escape(result['StackTrace'] or ''),
+                        cgi.escape(result['Message'] or ''),
+                    )
+                    testcase = '{0}    </testcase>\n'.format(testcase,)
+                else:
+                    testcase = '{0} />\n'.format(testcase,)
+                testcases += testcase
+
+            class_id = classes_by_name[class_name]
+            duration = logs_by_class_id['01p80000000t8aLAAQ']['DurationMilliseconds'] * .001
+            testsuite = '  <testsuite classname="{0}" tests="{1}" errors="{2}" failures="{3}" skipped="{4}" time="{5}">\n{6}</testsuite>\n'.format(
+                _cleanNames(class_name),
+                outcomes['Pass'] + outcomes['CompileFail'] + outcomes['Fail'] + outcomes['Skipped'],
+                outcomes['CompileFail'],
+                outcomes['Fail'],
+                outcomes['Skipped'],
+                duration,
+                testcases)
+            f.write(testsuite)
+        f.write('</testsuites>')
         f.close()
 
 
