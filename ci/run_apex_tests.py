@@ -508,8 +508,9 @@ def run_tests():
 
             for result in tests:
                 outcomes[result['Outcome']] = outcomes[result['Outcome']] + 1
-                if junit_namespace:
-                    output_classname = _cleanNames("{0}.{1}".format(junit_namespace, result['ClassName']))
+                output_namespace = junit_namespace or namespace
+                if output_namespace:
+                    output_classname = _cleanNames("{0}.{1}".format(output_namespace, result['ClassName']))
                 else:
                     output_classname = _cleanNames(result['ClassName'])
                 testcase = '    <testcase classname="{0}" name="{1}"'.format(output_classname, _cleanNames(result['Method']))
