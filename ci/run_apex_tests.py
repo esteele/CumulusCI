@@ -225,6 +225,7 @@ def run_tests():
     debug_logdir = os.environ.get('DEBUG_LOGDIR')
     json_output = os.environ.get('TEST_JSON_OUTPUT', None)
     junit_output = os.environ.get('TEST_JUNIT_OUTPUT', None)
+    junit_namespace = os.environ.get('TEST_JUNIT_NAMESPACE', None)
     
     if namespace:
         namespace = "'{0}'".format(namespace,)
@@ -499,7 +500,6 @@ def run_tests():
 
     if junit_output:
         f = codecs.open(junit_output, encoding='utf-8', mode='w')
-        # f.write('<testsuite name="" tests="{0}" errors="{1}" failures="{2}">\n'.format(len(test_results), counts['Fail'], counts['CompileFail']))
         f.write('<testsuites>\n')
         data = sorted(test_results, key=lambda x:(x['ClassName'], x['TestTimestamp']))
         for class_name, tests in groupby(data, lambda x:x['ClassName']):
@@ -508,7 +508,11 @@ def run_tests():
 
             for result in tests:
                 outcomes[result['Outcome']] = outcomes[result['Outcome']] + 1
-                testcase = '    <testcase classname="{0}" name="{1}"'.format(_cleanNames(result['ClassName']), _cleanNames(result['Method']))
+                if junit_namespace:
+                    output_classname = _cleanNames("{0}.{1}".format(junit_namespace, result['ClassName']))
+                else:
+                    output_classname = _cleanNames(result['ClassName'])
+                testcase = '    <testcase classname="{0}" name="{1}"'.format(output_classname, _cleanNames(result['Method']))
                 if 'Stats' in result and result['Stats'] and 'duration' in result['Stats']:
                     testcase = '{0} time="{1}"'.format(testcase, result['Stats']['duration'])
                 if result['Outcome'] in ['Fail','CompileFail']:
@@ -529,7 +533,7 @@ def run_tests():
             else:
                 duration = 0.0
             testsuite = '  <testsuite name="{0}" tests="{1}" errors="{2}" failures="{3}" skipped="{4}" time="{5}">\n{6}</testsuite>\n'.format(
-                _cleanNames(class_name),
+                output_classname,
                 outcomes['Pass'] + outcomes['CompileFail'] + outcomes['Fail'] + outcomes['Skipped'],
                 outcomes['CompileFail'],
                 outcomes['Fail'],

@@ -485,6 +485,7 @@ def get_env_apex_tests(config):
         'DEBUG_LOGDIR': config.apex_logdir,
         'TEST_JSON_OUTPUT': config.json_output,
         'TEST_JUNIT_OUTPUT': config.junit_output,
+        'TEST_JUNIT_NAMESPACE': config.junit_namespace,
     }
 def get_env_github(config):
     return {

@@ -296,6 +296,7 @@ Now that the metadata is deployed, you can run the tests::
     poll_interval                Seconds to wait between polling for Apex test results.  Defaults to 3
     namespace                    Salesforce project namespace.  Defaults to project__package__namespace
     junit_output                 File name for JUnit output.  Defaults to test_results.xml
+    junit_namespace              Prepend a namespace string to class names in junit output. Defaults to none
 
     $ cumulusci2 task run run_tests
     
